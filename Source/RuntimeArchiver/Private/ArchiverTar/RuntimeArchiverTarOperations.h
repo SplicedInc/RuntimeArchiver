@@ -4,6 +4,25 @@
 
 #include <string>
 #include "Misc/CString.h"
+#include "Misc/EngineVersionComparison.h" // SPLICED_DIVERGENCE - Aaron.Ruiz - 2024/10/29 Handle deprecation of TIsSame since Unreal 5.2
+
+// SPLICED_DIVERGENCE - Aaron.Ruiz - 2024/10/29 Handle deprecation of TIsSame since Unreal 5.2
+template <typename FirstSameType, typename SecondSameType, typename Result>
+using TEnableIfSameWithResult =
+#if UE_VERSION_NEWER_THAN(5, 2, 0)
+	typename TEnableIf<std::is_same<FirstSameType, SecondSameType>::value, Result>::Type;
+#else
+	typename TEnableIf<TIsSame<FirstSameType, SecondSameType>::Value, Result>::Type;
+#endif
+
+template <typename FirstSameType, typename SecondSameType>
+using TEnableIfSame =
+#if UE_VERSION_NEWER_THAN(5, 2, 0)
+	typename TEnableIf<std::is_same<FirstSameType, SecondSameType>::value>::Type;
+#else
+	typename TEnableIf<TIsSame<FirstSameType, SecondSameType>::Value>::Type;
+#endif
+// SPLICED_DIVERGENCE_END
 
 /**
  * Common functions that are used in tar operations
@@ -26,7 +45,7 @@ namespace RuntimeArchiverTarOperations
 	 * This overload is for int32
 	 */
 	template <typename DecimalType, typename CharType>
-	typename TEnableIf<TIsSame<DecimalType, int32>::Value, DecimalType>::Type
+	TEnableIfSameWithResult<DecimalType, int32, DecimalType> // SPLICED_DIVERGENCE - Aaron.Ruiz - 2024/10/29 Handle deprecation of TIsSame since Unreal 5.2
 	OctalToDecimal(const CharType* OctalString)
 	{
 		return std::stoi(OctalString, 0, 8);
@@ -37,7 +56,7 @@ namespace RuntimeArchiverTarOperations
 	 * This overload is for int64
 	 */
 	template <typename DecimalType, typename CharType>
-	typename TEnableIf<TIsSame<DecimalType, int64>::Value, DecimalType>::Type
+	TEnableIfSameWithResult<DecimalType, int64, DecimalType> // SPLICED_DIVERGENCE - Aaron.Ruiz - 2024/10/29 Handle deprecation of TIsSame since Unreal 5.2
 	OctalToDecimal(const CharType* OctalString)
 	{
 		return std::stoll(OctalString, 0, 8);
@@ -48,7 +67,7 @@ namespace RuntimeArchiverTarOperations
 	 * This overload is for uint32
 	 */
 	template <typename DecimalType, typename CharType>
-	typename TEnableIf<TIsSame<DecimalType, uint32>::Value, DecimalType>::Type
+	TEnableIfSameWithResult<DecimalType, uint32, DecimalType> // SPLICED_DIVERGENCE - Aaron.Ruiz - 2024/10/29 Handle deprecation of TIsSame since Unreal 5.2
 	OctalToDecimal(const CharType* OctalString)
 	{
 		return std::stoul(OctalString, 0, 8);
@@ -59,7 +78,7 @@ namespace RuntimeArchiverTarOperations
 	 * This overload is for int32
 	 */
 	template<typename DecimalType, typename CharType>
-	typename TEnableIf<TIsSame<DecimalType, int64>::Value>::Type
+	TEnableIfSame<DecimalType, int64> // SPLICED_DIVERGENCE - Aaron.Ruiz - 2024/10/29 Handle deprecation of TIsSame since Unreal 5.2
 	DecimalToOctal(DecimalType Decimal, CharType* Octal, int32 MaxLength)
 	{
 		TCString<CharType>::Sprintf(Octal, "%0*llo", MaxLength-1, Decimal);
@@ -70,7 +89,7 @@ namespace RuntimeArchiverTarOperations
 	 * This overload is for int32
 	 */
 	template<typename DecimalType, typename CharType>
-	typename TEnableIf<TIsSame<DecimalType, uint32>::Value>::Type
+	TEnableIfSame<DecimalType, uint32> // SPLICED_DIVERGENCE - Aaron.Ruiz - 2024/10/29 Handle deprecation of TIsSame since Unreal 5.2
 	DecimalToOctal(DecimalType Decimal, CharType* Octal, int32 MaxLength)
 	{
 		TCString<CharType>::Sprintf(Octal, "%0*o", MaxLength-1, Decimal);
