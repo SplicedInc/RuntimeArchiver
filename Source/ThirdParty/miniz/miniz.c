@@ -3069,6 +3069,23 @@ static FILE *mz_freopen(const char *pPath, const char *pMode, FILE *pStream)
 #define MZ_FFLUSH fflush
 #define MZ_FREOPEN(p, m, s) freopen64(p, m, s)
 #define MZ_DELETE_FILE remove
+// SPLICED_DIVERGENCE - Andreas.Mantler - 2024/05/09 Differentiate between more limited PS5 standard library and __FreeBSD__ standard library
+#elif defined(PLATFORM_PS5) && PLATFORM_PS5
+#ifndef MINIZ_NO_TIME
+#define MINIZ_NO_TIME
+#endif
+#define MZ_FOPEN(f, m) fopen(f, m)
+#define MZ_FCLOSE fclose
+#define MZ_FREAD fread
+#define MZ_FWRITE fwrite
+#define MZ_FTELL64 ftell
+#define MZ_FSEEK64 fseek
+#define MZ_FILE_STAT_STRUCT stat
+#define MZ_FILE_STAT stat
+#define MZ_FFLUSH fflush
+#define MZ_FREOPEN(p, m, s) freopen(p, m, s)
+#define MZ_DELETE_FILE remove
+// SPLICED_DIVERGENCE_END
 #elif defined(__APPLE__) || defined(__FreeBSD__)
 #ifndef MINIZ_NO_TIME
 #include <utime.h>
@@ -3086,7 +3103,8 @@ static FILE *mz_freopen(const char *pPath, const char *pMode, FILE *pStream)
 #define MZ_DELETE_FILE remove
 
 #else
-#pragma message("Using fopen, ftello, fseeko, stat() etc. path for file I/O - this path may not support large files.")
+// SPLICED_DIVERGENCE - Aaron.Ruiz - 2024/10/29 Commenting out pragma message since no large files will be handled
+//#pragma message("Using fopen, ftello, fseeko, stat() etc. path for file I/O - this path may not support large files.")
 #ifndef MINIZ_NO_TIME
 #include <utime.h>
 #endif
