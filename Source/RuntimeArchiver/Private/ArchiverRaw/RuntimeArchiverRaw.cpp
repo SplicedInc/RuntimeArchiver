@@ -197,7 +197,7 @@ bool URuntimeArchiverRaw::CompressRawData(ERuntimeArchiverRawFormat RawFormat, E
 		return false;
 	}
 
-	TempCompressedData.SetNum(CompressedSize, true);
+	TempCompressedData.SetNum(CompressedSize, EAllowShrinking::Yes);
 	CompressedData = MoveTemp(TempCompressedData);
 	return true;
 }
@@ -282,7 +282,8 @@ int64 URuntimeArchiverRaw::GuessCompressedSize(ERuntimeArchiverRawFormat RawForm
 		return false;
 	}
 #if UE_VERSION_NEWER_THAN(5, 0, 0)
-	return FCompression::GetMaximumCompressedSize(FormatName, UncompressedData.Num());
+	int64 MaxCompressedSize = 0;
+	return FCompression::GetMaximumCompressedSize(FormatName, MaxCompressedSize, UncompressedData.Num()) ? MaxCompressedSize : 0;
 #else
 	return FCompression::CompressMemoryBound(FormatName, UncompressedData.Num());
 #endif
